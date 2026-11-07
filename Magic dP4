@@ -2,8 +2,8 @@
 //Some preliminary objects
 //========================
 
-S<d,t,a1,a2,a3,a4,a5,a6,b1,b2,b3,b4,b5,b6>
-    := FunctionField(Rationals(),14);
+S<d,t,a1,a2,a3,a4,a5,a6,b1,b2,b3,b4,b5,b6,B>
+    := FunctionField(Rationals(),15);
 R<x>:=PolynomialRing(S);
 U<u0,u1,u2,u3,u4> := PolynomialRing(S,5);
 
@@ -18,17 +18,20 @@ Q4:=-2*d*u0*u1
 M3:=SymmetricMatrix(Q3);
 M4:=SymmetricMatrix(Q4);
 
+M33:=Submatrix(M3,3,3,3,3);
+M44:=Submatrix(M4,3,3,3,3);
+
 f := Determinant(M3+x*M4);
 print "f:",Factorisation(f);
 print "LC(f):",LeadingCoefficient(f);
+
+f2:=x^2+t;
+f3:=Determinant(M33+x*M44);
 
 print "Num(Delta):",Factorisation(Numerator(Discriminant(f)));
 print "LC(Num):",LeadingCoefficient(Numerator(Discriminant(f)));
 print "Denom(Delta):",Factorisation(Denominator(Discriminant(f)));
 print "LC(Den):",LeadingCoefficient(Denominator(Discriminant(f)));
-
-f2:=Factorisation(f)[1][1];
-f3:=Factorisation(f)[2][1];
 
 Deltaf3:=Discriminant(f3);
 print "Num(Deltaf3):",Factorisation(Numerator(Deltaf3));
