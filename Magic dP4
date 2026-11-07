@@ -7,7 +7,15 @@ S<d,t,a1,a2,a3,a4,a5,a6,b1,b2,b3,b4,b5,b6,B>
 R<x>:=PolynomialRing(S);
 U<u0,u1,u2,u3,u4> := PolynomialRing(S,5);
 
-Q3:=d*(u0^2-t*u1^2)
+//Q3:=d*(u0^2-t*u1^2)
+//    +t*a1*u2^2+2*t*a2*u2*u3+2*t*a3*u2*u4
+//    +t*a4*u3^2+2*t*a5*u3*u4+t^2*a6*u4^2;
+
+// Q4:=-2*d*u0*u1
+//    +b1*u2^2+2*b2*u2*u3+2*t*b3*u2*u4
+//    +b4*u3^2+2*t*b5*u3*u4+t*b6*u4^2;
+
+Q3:=d*(u0^2-(1+t)*u1^2)
     +t*a1*u2^2+2*t*a2*u2*u3+2*t*a3*u2*u4
     +t*a4*u3^2+2*t*a5*u3*u4+t^2*a6*u4^2;
 
@@ -25,7 +33,8 @@ f := Determinant(M3+x*M4);
 print "f:",Factorisation(f);
 print "LC(f):",LeadingCoefficient(f);
 
-f2:=x^2+t;
+// f2:=x^2+t;
+f2:=x^2+1+t;
 f3:=Determinant(M33+x*M44);
 condition:=Numerator(Coefficient(f3,1)-t*LeadingCoefficient(f3));
 print "condition is: 0=", condition;
