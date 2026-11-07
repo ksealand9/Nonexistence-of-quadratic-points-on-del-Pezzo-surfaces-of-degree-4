@@ -36,9 +36,6 @@ print "LC(Num):",LeadingCoefficient(Numerator(Deltaf3));
 print "Denom(Deltaf3):",Factorisation(Denominator(Deltaf3));
 print "LC(Den):",LeadingCoefficient(Denominator(Deltaf3));
 
-zeta:=t^(10)*(alpha+1)*(3*alpha-1)^3*(t+1)^4-2*alpha^2*t^5*(alpha-1)^4*(9*alpha^2+12*alpha+1)*(t+1)^2-alpha^4*(alpha-1)^8;
-3^3*Factorisation(Numerator(Discriminant(f)))[4][1]-zeta;
-
 L2<sqy>:= quo<R | f2>;
 L3<the> := quo<R | f3>;
 
