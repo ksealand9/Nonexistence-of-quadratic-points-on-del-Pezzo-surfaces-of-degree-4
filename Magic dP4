@@ -1,0 +1,68 @@
+//========================
+//Some preliminary objects
+//========================
+
+S<d,t,a1,a2,a3,a4,a5,a6,b1,b2,b3,b4,b5,b6>
+    := FunctionField(Rationals(),14);
+R<x>:=PolynomialRing(S);
+U<u0,u1,u2,u3,u4> := PolynomialRing(S,5);
+
+Q3:=d*(u0^2-t*u1^2)
+    +t*a1*u2^2+2*t*a2*u2*u3+2*t*a3*u2*u4
+    +t*a4*u3^2+2*t*a5*u3*u4+t^2*a6*u4^2;
+
+Q4:=-2*d*u0*u1
+    +b1*u2^2+2*b2*u2*u3+2*t*b3*u2*u4
+    +b4*u3^2+2*t*b5*u3*u4+t*b6*u4^2;
+
+M3:=SymmetricMatrix(Q3);
+M4:=SymmetricMatrix(Q4);
+
+f := Determinant(M3+x*M4);
+print "f:",Factorisation(f);
+print "LC(f):",LeadingCoefficient(f);
+
+print "Num(Delta):",Factorisation(Numerator(Discriminant(f)));
+print "LC(Num):",LeadingCoefficient(Numerator(Discriminant(f)));
+print "Denom(Delta):",Factorisation(Denominator(Discriminant(f)));
+print "LC(Den):",LeadingCoefficient(Denominator(Discriminant(f)));
+
+f2:=Factorisation(f)[1][1];
+f3:=Factorisation(f)[2][1];
+
+Deltaf3:=Discriminant(f3);
+print "Num(Deltaf3):",Factorisation(Numerator(Deltaf3));
+print "LC(Num):",LeadingCoefficient(Numerator(Deltaf3));
+print "Denom(Deltaf3):",Factorisation(Denominator(Deltaf3));
+print "LC(Den):",LeadingCoefficient(Denominator(Deltaf3));
+
+zeta:=t^(10)*(alpha+1)*(3*alpha-1)^3*(t+1)^4-2*alpha^2*t^5*(alpha-1)^4*(9*alpha^2+12*alpha+1)*(t+1)^2-alpha^4*(alpha-1)^8;
+3^3*Factorisation(Numerator(Discriminant(f)))[4][1]-zeta;
+
+L2<sqy>:= quo<R | f2>;
+L3<the> := quo<R | f3>;
+
+M:=M3+sqy*M4;
+M2:=Submatrix(M,[2,3,4,5],[2,3,4,5]);
+epsilon2:=Determinant(M2);
+print "epsilon2: ", epsilon2;
+print "Norm(epsilon2):", Norm(epsilon2);
+print "Is Norm(epsilon2) square?", IsSquare(Norm(epsilon2));
+print "Is epsilon2 square?", IsSquare(epsilon2);
+
+M:=M3+the*M4;
+M2:=Submatrix(M,[1,2,3,5],[1,2,3,5]);
+epsilon3:=Determinant(M2);
+print "epsilon3: ", epsilon3;
+print "Is Norm(epsilon3) square?", IsSquare(Norm(epsilon3));
+print "Is epsilon3 square?", IsSquare(epsilon3);
+MinimalPolynomial(epsilon3);
+
+M33:=Submatrix(M3,3,3,3,3);
+M44:=Submatrix(M4,3,3,3,3);
+
+Pencil:=B*M33+M44;
+
+MP:=SymmetricMatrix(DiagonalForm(QuadraticForm(Pencil)));
+
+MP;
