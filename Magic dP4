@@ -27,6 +27,8 @@ print "LC(f):",LeadingCoefficient(f);
 
 f2:=x^2+t;
 f3:=Determinant(M33+x*M44);
+condition:=Numerator(Coefficient(f3,1)-t*LeadingCoefficient(f3));
+print "condition is: 0=", condition;
 
 print "Num(Delta):",Factorisation(Numerator(Discriminant(f)));
 print "LC(Num):",LeadingCoefficient(Numerator(Discriminant(f)));
