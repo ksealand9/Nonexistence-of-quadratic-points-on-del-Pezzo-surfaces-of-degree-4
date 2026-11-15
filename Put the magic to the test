@@ -16,3 +16,8 @@ magictest:=function(Q3,Q4)
     end if;
     return ELS, false;
 end function;
+
+Q3:=;
+Q4:=;
+
+magictest(Q3,Q4);
