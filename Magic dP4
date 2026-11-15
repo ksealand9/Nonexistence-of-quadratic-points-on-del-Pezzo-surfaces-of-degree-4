@@ -2,24 +2,16 @@
 //Some preliminary objects
 //========================
 
-S<d,t,a1,a2,a3,a4,a5,a6,b1,b2,b3,b4,b5,b6,B>
-    := FunctionField(Rationals(),15);
+S<d,t,c1,c2,c3,e1,e2,e3,a1,a2,a3,a4,a5,a6,b1,b2,b3,b4,b5,b6,B>
+    := FunctionField(Rationals(),21);
 R<x>:=PolynomialRing(S);
 U<u0,u1,u2,u3,u4> := PolynomialRing(S,5);
 
-Q3:=d*(u0^2-t*u1^2)
+Q3:=c1*u0^2+2*c2*u0*u1+c3*u1^2
     +t*a1*u2^2+2*t*a2*u2*u3+2*t*a3*u2*u4
     +t*a4*u3^2+2*t*a5*u3*u4+t^2*a6*u4^2;
 
-Q4:=-2*d*u0*u1
-    +b1*u2^2+2*b2*u2*u3+2*t*b3*u2*u4
-    +b4*u3^2+2*t*b5*u3*u4+t*b6*u4^2;
-
-Q3:=d*(u0^2-(1+t)*u1^2)
-    +t*a1*u2^2+2*t*a2*u2*u3+2*t*a3*u2*u4
-    +t*a4*u3^2+2*t*a5*u3*u4+t^2*a6*u4^2;
-
-Q4:=-2*d*u0*u1
+Q4:=e1*u0^2+2*e2*u0*u1+e3*u1^2
     +b1*u2^2+2*b2*u2*u3+2*t*b3*u2*u4
     +b4*u3^2+2*t*b5*u3*u4+t*b6*u4^2;
 
