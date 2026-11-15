@@ -1,0 +1,114 @@
+//========================
+//Some preliminary objects
+//========================
+
+S<d,t,c1,c2,c3,e1,e2,e3,a1,a2,a3,a4,a5,a6,b1,b2,b3,b4,b5,b6,B>
+    := FunctionField(Rationals(),21);
+R<x>:=PolynomialRing(S);
+U<u0,u1,u2,u3,u4> := PolynomialRing(S,5);
+
+c3:=(2*c2*e2-c1*e3)/e1;
+//This is to remove the x term from the quadratic factor
+
+Q3:=c1*u0^2+2*c2*u0*u1+c3*u1^2
+    +t*a1*u2^2+2*t*a2*u2*u3+2*t*a3*u2*u4
+    +t*a4*u3^2+2*t*a5*u3*u4+t^2*a6*u4^2;
+
+Q4:=e1*u0^2+2*e2*u0*u1+e3*u1^2
+    +b1*u2^2+2*b2*u2*u3+2*t*b3*u2*u4
+    +b4*u3^2+2*t*b5*u3*u4+t*b6*u4^2;
+
+M3:=SymmetricMatrix(Q3);
+M4:=SymmetricMatrix(Q4);
+
+M31:=Submatrix(M3,1,1,2,2);
+M41:=Submatrix(M4,1,1,2,2);
+M33:=Submatrix(M3,3,3,3,3);
+M44:=Submatrix(M4,3,3,3,3);
+
+D0:=Determinant(M31);
+Dinf:=Determinant(M41);
+
+f2:=Determinant(M31+x*M41);
+f3:=Determinant(M33+x*M44);
+
+f:=f2*f3;
+print "f:",Factorisation(f);
+print "LC(f):",LeadingCoefficient(f);
+
+kappa:=Coefficient(f2,0)/LeadingCoefficient(f2);
+condition:=Numerator(
+    c1*(Coefficient(f3,1)-kappa*Coefficient(f3,3))
+    +e1*(Coefficient(f3,0)-kappa*Coefficient(f3,2))
+);
+print "condition is: 0=", condition;
+
+L2<sqy>:= quo<R | f2>;
+L3<the> := quo<R | f3>;
+
+
+
+Pencil:=B*M33+M44;
+
+MP:=SymmetricMatrix(DiagonalForm(QuadraticForm(Pencil)));
+
+MP;
+
+// Sample coefficients; solve the condition for a6; keep three examples.
+
+// f3 is NOT monic, so retain its cubic coefficient here.
+H:=c1*(Coefficient(f3,1)-kappa*Coefficient(f3,3))
+    +e1*(Coefficient(f3,0)-kappa*Coefficient(f3,2));
+condition:=Numerator(H);
+
+p:=5;
+F:=GF(p);
+hits:=[];
+
+V<u0,u1,u2,u3,u4>:=PolynomialRing(Rationals(),5);
+
+for trial in [1..10000] do
+    v:=[Rationals()!Random(-10,10): i in [1..21]];
+    v[2]:=p;
+    v[3]:=p*v[3]; v[4]:=p*v[4]; // c1,c2 divisible by p
+    v[6]:=1;                     // e1=1, so derived c3 is also divisible by p
+
+
+
+
+
+    // Binary test: -det(c_infty) is a nonzero square modulo p.
+    delta:=F!(v[7]^2-v[6]*v[8]);
+    if delta eq 0 then continue; end if;
+    if not IsSquare(delta) then continue; end if;
+
+    v[14]:=0; h0:=Evaluate(H,v);
+    v[14]:=1; h1:=Evaluate(H,v);
+    if h1 eq h0 then continue; end if;
+    v[14]:=-h0/(h1-h0);           // solve for a6
+
+    // Ternary test: the sufficient valuation conditions for all b in Z_p.
+    if v[14] ne 0 then
+        if Valuation(v[14],p) lt 0 then continue; end if;
+    end if;
+    if F!v[20] eq 0 then continue; end if;
+    if IsSquare(F!(v[16]^2-v[15]*v[18])) then continue; end if;
+
+    assert Evaluate(H,v) eq 0;
+    v[5]:=Evaluate(c3,v);
+    Append(~hits,v);
+    N3:=Matrix(Rationals(),5,5,
+    [Evaluate(a,v): a in Eltseq(M3)]);
+N4:=Matrix(Rationals(),5,5,
+    [Evaluate(a,v): a in Eltseq(M4)]);
+
+Q0num:=Evaluate(QuadraticForm(N3),[u0,u1,u2,u3,u4]);
+Qinfnum:=Evaluate(QuadraticForm(N4),[u0,u1,u2,u3,u4]);
+
+printf "Q3 := %o;\n",Q0num;
+printf "Q4 := %o;\n",Qinfnum;
+    print "Both pencil conditions hold for every integral parameter.";
+    if #hits eq 3 then break; end if;
+end for;
+print "Hits:",#hits;
+
