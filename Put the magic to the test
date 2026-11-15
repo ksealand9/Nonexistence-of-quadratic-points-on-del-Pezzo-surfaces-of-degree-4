@@ -8,8 +8,9 @@ magictest:=function(Q3,Q4)
     f := Determinant(ChangeRing(M3,R)+x*ChangeRing(M4,R));
     PrimesD:=[x[1]:x in Factorisation(Numerator(Discriminant(f)))];
     print PrimesD;
+    print "Untested primes:", [p: p in PrimesD | p gt 1000];
     X := Scheme(P, [Q3, Q4]);
-    ELS:=&and[IsLocallySoluble(X,p):  p in PrimesD cat [2,3]];
+    ELS:=&and[IsLocallySolvable(X,p): p in PrimesD cat [2,3] | p le 1000];
     if ELS eq true then
         pts:=PointSearch(X, 100 : OnlyOne := true);
         return ELS,pts;
@@ -17,7 +18,6 @@ magictest:=function(Q3,Q4)
     return ELS, false;
 end function;
 
-Q3:=;
+Q3;=;
 Q4:=;
-
 magictest(Q3,Q4);
