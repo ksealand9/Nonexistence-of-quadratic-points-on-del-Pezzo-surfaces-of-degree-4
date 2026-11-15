@@ -33,7 +33,11 @@ f:=f2*f3;
 print "f:",Factorisation(f);
 print "LC(f):",LeadingCoefficient(f);
 
-condition:=Numerator(Coefficient(f3,1)-t*LeadingCoefficient(f3));
+kappa:=Coefficient(f2,0)/LeadingCoefficient(f2);
+condition:=Numerator(
+    c1*(Coefficient(f3,1)-kappa)
+    +e1*(Coefficient(f3,0)-kappa*Coefficient(f3,2))
+);
 print "condition is: 0=", condition;
 
 print "Num(Delta):",Factorisation(Numerator(Discriminant(f)));
