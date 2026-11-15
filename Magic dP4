@@ -7,6 +7,9 @@ S<d,t,c1,c2,c3,e1,e2,e3,a1,a2,a3,a4,a5,a6,b1,b2,b3,b4,b5,b6,B>
 R<x>:=PolynomialRing(S);
 U<u0,u1,u2,u3,u4> := PolynomialRing(S,5);
 
+c3:=(2*c2*e2-c1*e3)/e1;
+//This is to remove the x term from the quadratic factor
+
 Q3:=c1*u0^2+2*c2*u0*u1+c3*u1^2
     +t*a1*u2^2+2*t*a2*u2*u3+2*t*a3*u2*u4
     +t*a4*u3^2+2*t*a5*u3*u4+t^2*a6*u4^2;
