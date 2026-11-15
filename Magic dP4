@@ -18,15 +18,18 @@ Q4:=e1*u0^2+2*e2*u0*u1+e3*u1^2
 M3:=SymmetricMatrix(Q3);
 M4:=SymmetricMatrix(Q4);
 
+M31:=Submatrix(M3,1,1,2,2);
+M41:=Submatrix(M4,1,1,2,2);
 M33:=Submatrix(M3,3,3,3,3);
 M44:=Submatrix(M4,3,3,3,3);
 
-f := Determinant(M3+x*M4);
+f2:=Determinant(M31+x*M41);
+f3:=Determinant(M33+x*M44);
+
+f:=f2*f3;
 print "f:",Factorisation(f);
 print "LC(f):",LeadingCoefficient(f);
 
-f2:=x^2+t;
-f3:=Determinant(M33+x*M44);
 condition:=Numerator(Coefficient(f3,1)-t*LeadingCoefficient(f3));
 print "condition is: 0=", condition;
 
