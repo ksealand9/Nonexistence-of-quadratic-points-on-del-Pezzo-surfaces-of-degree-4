@@ -1,1 +1,18 @@
+Q := Rationals();
+P<u0,u1,u2,u3,u4> := ProjectiveSpace(Q, 4);
+R<x>:=PolynomialRing(Q);
 
+magictest:=function(Q3,Q4)
+    M3:=SymmetricMatrix(Q3);
+    M4:=SymmetricMatrix(Q4);
+    f := Determinant(ChangeRing(M3,R)+x*ChangeRing(M4,R));
+    PrimesD:=[x[1]:x in Factorisation(Numerator(Discriminant(f)))];
+    print PrimesD;
+    X := Scheme(P, [Q3, Q4]);
+    ELS:=&and[IsLocallySoluble(X,p):  p in PrimesD cat [2,3]];
+    if ELS eq true then
+        pts:=PointSearch(X, 100 : OnlyOne := true);
+        return ELS,pts;
+    end if;
+    return ELS, false;
+end function;
