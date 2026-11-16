@@ -1,1 +1,143 @@
+//========================
+//Some preliminary objects
+//========================
+
+S<d,t,c1,c2,c3,e1,e2,e3,a1,a2,a3,a4,a5,a6,b1,b2,b3,b4,b5,b6,B>
+    := FunctionField(Rationals(),21);
+R<x>:=PolynomialRing(S);
+U<u0,u1,u2,u3,u4>:=PolynomialRing(S,5);
+
+c3:=(2*c2*e2-c1*e3)/e1;
+// This removes the x term from the quadratic factor.
+
+Q3:=c1*u0^2+2*c2*u0*u1+c3*u1^2
+    +t*a1*u2^2+2*t*a2*u2*u3+2*t*a3*u2*u4
+    +t*a4*u3^2+2*t*a5*u3*u4+t^2*a6*u4^2;
+
+Q4:=e1*u0^2+2*e2*u0*u1+e3*u1^2
+    +b1*u2^2+2*b2*u2*u3+2*t*b3*u2*u4
+    +b4*u3^2+2*t*b5*u3*u4+t*b6*u4^2;
+
+M3:=SymmetricMatrix(Q3);
+M4:=SymmetricMatrix(Q4);
+M31:=Submatrix(M3,1,1,2,2);
+M41:=Submatrix(M4,1,1,2,2);
+M33:=Submatrix(M3,3,3,3,3);
+M44:=Submatrix(M4,3,3,3,3);
+
+f2:=Determinant(M31+x*M41);
+f3:=Determinant(M33+x*M44);
+kappa:=Coefficient(f2,0)/LeadingCoefficient(f2);
+H:=c1*(Coefficient(f3,1)-kappa*Coefficient(f3,3))
+    +e1*(Coefficient(f3,0)-kappa*Coefficient(f3,2));
+condition:=Numerator(H);
+
+//========================
+//Generate ten hits
+//========================
+
+p:=5;
+F:=GF(p);
+hits:=[];
+V<u0,u1,u2,u3,u4>:=PolynomialRing(Rationals(),5);
+Rtest<y>:=PolynomialRing(Rationals());
+Ptest:=ProjectiveSpace(Rationals(),4);
+
+while #hits lt 10 do
+    v:=[Rationals()!Random(-2,2): i in [1..21]];
+    v[2]:=p;
+    v[3]:=p*v[3]; v[4]:=p*v[4];
+    v[6]:=1;
+
+    delta:=F!(v[7]^2-v[6]*v[8]);
+    if delta eq 0 then continue; end if;
+    if not IsSquare(delta) then continue; end if;
+
+    v[14]:=0; h0:=Evaluate(H,v);
+    v[14]:=1; h1:=Evaluate(H,v);
+    if h1 eq h0 then continue; end if;
+    v[14]:=-h0/(h1-h0);
+
+    if v[14] ne 0 then
+        if Valuation(v[14],p) lt 0 then continue; end if;
+    end if;
+    if F!v[20] eq 0 then continue; end if;
+    if IsSquare(F!(v[16]^2-v[15]*v[18])) then continue; end if;
+
+    assert Evaluate(H,v) eq 0;
+    v[5]:=Evaluate(c3,v);
+    support:=&join[
+        Set(PrimeDivisors(Abs(Numerator(a)*Denominator(a))))
+        : a in v | a ne 0
+    ];
+    if exists{ell: ell in support | ell gt 7} then continue; end if;
+
+    N3:=Matrix(Rationals(),5,5,[Evaluate(a,v): a in Eltseq(M3)]);
+    N4:=Matrix(Rationals(),5,5,[Evaluate(a,v): a in Eltseq(M4)]);
+    ftest:=Determinant(ChangeRing(N3,Rtest)+y*ChangeRing(N4,Rtest));
+    if Degree(ftest) ne 5 then continue; end if;
+    if Discriminant(ftest) eq 0 then continue; end if;
+
+    Q0num:=Evaluate(QuadraticForm(N3),[u0,u1,u2,u3,u4]);
+    Qinfnum:=Evaluate(QuadraticForm(N4),[u0,u1,u2,u3,u4]);
+    if <Q0num,Qinfnum> in hits then continue; end if;
+    Xtest:=Scheme(Ptest,[
+        Evaluate(Q0num,[Ptest.i: i in [1..5]]),
+        Evaluate(Qinfnum,[Ptest.i: i in [1..5]])
+    ]);
+    if not IsLocallySolvable(Xtest,2) then continue; end if;
+
+    Append(~hits,<Q0num,Qinfnum>);
+    print "Hits:",#hits;
+end while;
+
+//========================
+//Test each hit
+//========================
+
+Q:=Rationals();
+P<u0,u1,u2,u3,u4>:=ProjectiveSpace(Q,4);
+R<x>:=PolynomialRing(Q);
+
+magictest:=function(Q3,Q4)
+    M3:=SymmetricMatrix(Q3);
+    M4:=SymmetricMatrix(Q4);
+    // Clear denominators before extracting potentially bad primes.
+    M3:=LCM([Denominator(a): a in Eltseq(M3)])*M3;
+    M4:=LCM([Denominator(a): a in Eltseq(M4)])*M4;
+    f:=Determinant(ChangeRing(M3,R)+x*ChangeRing(M4,R));
+    PrimesD:=Sort(Setseq(
+        Set(PrimeDivisors(Abs(Integers()!(
+            2*LeadingCoefficient(f)*Discriminant(f))))) join {3}
+    ));
+    print "Untested primes:",[ell: ell in PrimesD | ell gt 200];
+    X:=Scheme(P,[Q3,Q4]);
+
+    for ell in PrimesD do
+        if ell gt 200 then continue; end if;
+        soluble:=IsLocallySolvable(X,ell);
+        print "Prime",ell,":",soluble;
+        if not soluble then return false,[]; end if;
+    end for;
+
+    pts:=PointSearch(X,200 : OnlyOne:=true);
+    print "Point found:",#pts gt 0;
+    return true,pts;
+end function;
+
+for i in [1..#hits] do
+    print "Testing hit",i;
+    Q3:=Evaluate(hits[i][1],[u0,u1,u2,u3,u4]);
+    Q4:=Evaluate(hits[i][2],[u0,u1,u2,u3,u4]);
+    ELS,pts:=magictest(Q3,Q4);
+    if ELS and #pts eq 0 then
+        print "Passed tested primes; no point found with search bound 200.";
+        printf "Q3 := %o;\n",Q3;
+        printf "Q4 := %o;\n",Q4;
+    end if;
+end for;
+
+// ELS here means only the finite tests performed, not full ELS.
+// The real place and listed untested primes still need checking.
+// An empty PointSearch result does not prove absence of rational points.
 
