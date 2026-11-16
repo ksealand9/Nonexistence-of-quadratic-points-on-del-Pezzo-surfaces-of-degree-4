@@ -68,7 +68,7 @@ hits:=[];
 V<u0,u1,u2,u3,u4>:=PolynomialRing(Rationals(),5);
 
 for trial in [1..10000] do
-    v:=[Rationals()!Random(-10,10): i in [1..21]];
+    v:=[Rationals()!Random(-2,2): i in [1..21]];
     v[2]:=p;
     v[3]:=p*v[3]; v[4]:=p*v[4]; // c1,c2 divisible by p
     v[6]:=1;                     // e1=1, so derived c3 is also divisible by p
@@ -96,6 +96,16 @@ for trial in [1..10000] do
 
     assert Evaluate(H,v) eq 0;
     v[5]:=Evaluate(c3,v);
+    // Keep only coefficients whose numerators and denominators
+// have prime factors at most 7.
+support:=&join[
+    Set(PrimeDivisors(Abs(Numerator(a)*Denominator(a))))
+    : a in v | a ne 0
+];
+
+if exists{ell: ell in support | ell gt 7} then
+    continue;
+end if;
     Append(~hits,v);
     N3:=Matrix(Rationals(),5,5,
     [Evaluate(a,v): a in Eltseq(M3)]);
