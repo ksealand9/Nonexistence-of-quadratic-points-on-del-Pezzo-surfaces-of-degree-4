@@ -46,13 +46,57 @@ print "condition is: 0=", condition;
 L2<sqy>:= quo<R | f2>;
 L3<the> := quo<R | f3>;
 
-
-
 Pencil:=B*M33+M44;
-
 MP:=SymmetricMatrix(DiagonalForm(QuadraticForm(Pencil)));
-
 MP;
+
+function FindPointDegree2(Q3, Q4, H)
+    Q := Rationals();
+    R<t> := PolynomialRing(Q);
+
+    vectors := [
+        [Q!a[i] : i in [1..5]]
+        : a in CartesianPower({-H..H}, 5)
+        | a ne <0,0,0,0,0>
+    ];
+
+    // First check rational points.
+    for p in vectors do
+        if Evaluate(Q3,p) eq 0 and Evaluate(Q4,p) eq 0 then
+            return true, p;
+        end if;
+    end for;
+
+    // Then check rational lines.
+    for p in vectors do
+        for v in vectors do
+            if Rank(Matrix(Q,2,5,p cat v)) lt 2 then
+                continue;
+            end if;
+
+            line := [R!p[i] + t*v[i] : i in [1..5]];
+            g := GCD(Evaluate(Q3,line), Evaluate(Q4,line));
+
+            if Degree(g) le 0 then
+                continue;
+            end if;
+
+            h := Factorisation(g)[1][1];
+            if Degree(h) eq 1 then
+                a := -Coefficient(h,0)/Coefficient(h,1);
+            else
+                K<a> := NumberField(h);
+            end if;
+
+            point := [p[i] + a*v[i] : i in [1..5]];
+            assert Evaluate(Q3,point) eq 0;
+            assert Evaluate(Q4,point) eq 0;
+            return true, point;
+        end for;
+    end for;
+
+    return false, [];
+end function;
 
 // Sample coefficients; solve the condition for a6; keep three examples.
 
@@ -71,11 +115,7 @@ for trial in [1..10000] do
     v:=[Rationals()!Random(-2,2): i in [1..21]];
     v[2]:=p;
     v[3]:=p*v[3]; v[4]:=p*v[4]; // c1,c2 divisible by p
-    v[6]:=1;                     // e1=1, so derived c3 is also divisible by p
-
-
-
-
+    v[6]:=1;                     // e1=1
 
     // Binary test: -det(c_infty) is a nonzero square modulo p.
     delta:=F!(v[7]^2-v[6]*v[8]);
@@ -87,7 +127,7 @@ for trial in [1..10000] do
     if h1 eq h0 then continue; end if;
     v[14]:=-h0/(h1-h0);           // solve for a6
 
-    // Ternary test: the sufficient valuation conditions for all b in Z_p.
+    // Ternary test: sufficient valuation conditions for all b in Z_p.
     if v[14] ne 0 then
         if Valuation(v[14],p) lt 0 then continue; end if;
     end if;
@@ -96,29 +136,34 @@ for trial in [1..10000] do
 
     assert Evaluate(H,v) eq 0;
     v[5]:=Evaluate(c3,v);
+
     // Keep only coefficients whose numerators and denominators
-// have prime factors at most 7.
-support:=&join[
-    Set(PrimeDivisors(Abs(Numerator(a)*Denominator(a))))
-    : a in v | a ne 0
-];
+    // have prime factors at most 7.
+    support:=&join[
+        Set(PrimeDivisors(Abs(Numerator(a)*Denominator(a))))
+        : a in v | a ne 0
+    ];
 
-if exists{ell: ell in support | ell gt 7} then
-    continue;
-end if;
-    Append(~hits,v);
+    if exists{ell: ell in support | ell gt 7} then
+        continue;
+    end if;
+
     N3:=Matrix(Rationals(),5,5,
-    [Evaluate(a,v): a in Eltseq(M3)]);
-N4:=Matrix(Rationals(),5,5,
-    [Evaluate(a,v): a in Eltseq(M4)]);
+        [Evaluate(a,v): a in Eltseq(M3)]);
+    N4:=Matrix(Rationals(),5,5,
+        [Evaluate(a,v): a in Eltseq(M4)]);
 
-Q0num:=Evaluate(QuadraticForm(N3),[u0,u1,u2,u3,u4]);
-Qinfnum:=Evaluate(QuadraticForm(N4),[u0,u1,u2,u3,u4]);
+    Q0num:=Evaluate(QuadraticForm(N3),[u0,u1,u2,u3,u4]);
+    Qinfnum:=Evaluate(QuadraticForm(N4),[u0,u1,u2,u3,u4]);
 
-printf "Q3 := %o;\n",Q0num;
-printf "Q4 := %o;\n",Qinfnum;
+    found, point := FindPointDegree2(Q0num,Qinfnum,1);
+    if found then continue; end if;
+
+    Append(~hits,v);
+    printf "Q3 := %o;\n",Q0num;
+    printf "Q4 := %o;\n",Qinfnum;
     print "Both pencil conditions hold for every integral parameter.";
+    print "No point of degree at most 2 found with bound 1.";
     if #hits eq 3 then break; end if;
 end for;
 print "Hits:",#hits;
-
