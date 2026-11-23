@@ -111,11 +111,6 @@ hits:=[];
 
 V<u0,u1,u2,u3,u4>:=PolynomialRing(Rationals(),5);
 P4 := ProjectiveSpace(V);
-X := Scheme(P4,[Q0num,Qinfnum]);
-if not IsNonsingular(X) then continue; end if;
-if not &and[IsLocallySolvable(X,ell) : ell in [2,3,5,7]] then
-    continue;
-end if;
 
 for trial in [1..10000] do
     v:=[Rationals()!Random(-2,2): i in [1..21]];
@@ -159,8 +154,14 @@ for trial in [1..10000] do
     N4:=Matrix(Rationals(),5,5,
         [Evaluate(a,v): a in Eltseq(M4)]);
 
-    Q0num:=Evaluate(QuadraticForm(N3),[u0,u1,u2,u3,u4]);
+        Q0num:=Evaluate(QuadraticForm(N3),[u0,u1,u2,u3,u4]);
     Qinfnum:=Evaluate(QuadraticForm(N4),[u0,u1,u2,u3,u4]);
+
+    X := Scheme(P4,[Q0num,Qinfnum]);
+    if not IsNonsingular(X) then continue; end if;
+    if not &and[IsLocallySolvable(X,ell) : ell in [2,3,5,7]] then
+        continue;
+    end if;
 
     found, point := FindPointDegree2(Q0num,Qinfnum,1);
     if found then continue; end if;
