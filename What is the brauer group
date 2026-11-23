@@ -1,0 +1,94 @@
+//========================
+//Some preliminary objects
+//========================
+
+S<d,t,alpha,B> := FunctionField(Rationals(),4);
+OS := RingOfIntegers(S);
+R<x> := PolynomialRing(S);
+U<u0,u1,u2,u3,u4> := PolynomialRing(S,5);
+
+a:=12;
+b:=111;
+c:=13;
+Q3 := u0*u1+5*u2^2-d*u3^2;
+Q4 := a*u0^2+b*u1^2+c*u2^2-d*u4^2;
+
+X:=Scheme(ProjectiveSpace(U),[Q3,Q4]);
+
+//Change Q3 to have nonzero determinant
+change := [a : a in [0,1,-1,2,-2,3] |
+    Determinant(SymmetricMatrix(Q3+a*Q4)) ne 0][1];
+Q32 := Q3+change*Q4;
+change2 := Determinant(SymmetricMatrix(Q32));
+
+//Change Q3 to have determinant 1
+Q33 := 1/change2*Evaluate(Q32,[u0*change2^2,u1,u2,u3,u4]);
+Q43 := 1/change2*Evaluate(Q4,[u0*change2^2,u1,u2,u3,u4]);
+
+M3 := SymmetricMatrix(Q33);
+M4 := SymmetricMatrix(Q43);
+
+f := Determinant(M3*x+M4);
+assert Degree(f) eq 5;
+assert LeadingCoefficient(f) eq 1;
+
+print "f:", Factorisation(f);
+print "LC(f):", LeadingCoefficient(f);
+
+print "Num(Delta):",Factorisation(Numerator(Discriminant(f)));
+print "LC(Num):",LeadingCoefficient(Numerator(Discriminant(f)));
+print "Denom(Delta):",Factorisation(Denominator(Discriminant(f)));
+print "LC(Den):",LeadingCoefficient(Denominator(Discriminant(f)));
+
+
+f1:=Factorisation(f)[1][1];
+f2:=Factorisation(f)[2][1];
+f3:=Factorisation(f)[3][1];
+f4:=Factorisation(f)[4][1];
+
+L2<sqy>:= quo<R | f3>;
+M:=M3*sqy+M4;
+M;
+M2:=Submatrix(M,[1,2,4,5],[1,2,4,5]);
+epsilon2:=Determinant(M2);
+print "epsilon2: ", epsilon2;
+IsSquare(epsilon2);
+Norm(epsilon2);
+Factorisation(8647015);
+Factorisation(419904);
+Factorisation(102065640192);
+Factorisation(805250099471041);
+
+Deltaf3:=Discriminant(f3);
+print "Num(Deltaf3):",Factorisation(Numerator(Deltaf3));
+print "LC(Num):",LeadingCoefficient(Numerator(Deltaf3));
+print "Denom(Deltaf3):",Factorisation(Denominator(Deltaf3));
+print "LC(Den):",LeadingCoefficient(Denominator(Deltaf3));
+
+L2<sqy>:= quo<R | f2>;
+L3<the> := quo<R | f3>;
+
+M:=M3+sqy*M4;
+M2:=Submatrix(M,[1,3,4,5],[1,3,4,5]);
+epsilon2:=Determinant(M2);
+print "epsilon2: ", epsilon2;
+print "Norm(epsilon2):", Norm(epsilon2);
+print "Is Norm(epsilon2) square?", IsSquare(Norm(epsilon2));
+print "Is epsilon2 square?", IsSquare(epsilon2);
+
+M:=M3+the*M4;
+M2:=Submatrix(M,[1,2,3,5],[1,2,3,5]);
+epsilon3:=Determinant(M2);
+print "epsilon3: ", epsilon3;
+print "Is Norm(epsilon3) square?", IsSquare(Norm(epsilon3));
+print "Is epsilon3 square?", IsSquare(epsilon3);
+MinimalPolynomial(epsilon3);
+
+M33:=Submatrix(M3,3,3,3,3);
+M44:=Submatrix(M4,3,3,3,3);
+
+Pencil:=B*M33+M44;
+
+MP:=SymmetricMatrix(DiagonalForm(QuadraticForm(Pencil)));
+
+MP;
