@@ -1,0 +1,11 @@
+U<u0,u1,u2,u3,u4> := PolynomialRing(Rationals(),5);
+
+for d in PrimesUpTo(200) do
+    if d le 50 eq false then
+        Q3 := d*(-u0^2 - 2*u0*u1 + 4*u1^2) + u2^2 + 4*u2*u3 + 2*u3^2 + 2*u2*u4 +
+15*u4^2;
+        Q4 := d*(u0^2 - 2*u0*u1 + 2*u1^2) + u2^2 + 2*u3^2 - 5*u4^2;
+        X:=Scheme(ProjectiveSpace(U),[Q3,Q4]);
+        PointSearch(X,200);
+    end if;
+end for;
