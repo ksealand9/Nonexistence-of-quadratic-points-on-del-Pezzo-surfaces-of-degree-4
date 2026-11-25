@@ -1,3 +1,6 @@
+load "Qtpoint.m";
+load "TwistsPointSearch.m";
+
 function Hits(N : p := 5)
     assert N ge 1 and p gt 1 and IsPrime(p);
 
