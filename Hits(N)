@@ -1,0 +1,102 @@
+function Hits(N : p := 5)
+    assert N ge 1 and p gt 1 and IsPrime(p);
+
+k := Rationals();
+R<x> := PolynomialRing(k);
+U<u0,u1,u2,u3,u4> := PolynomialRing(k,5);
+P := ProjectiveSpace(U);
+
+f2 := x^2+p;
+K2<sqy> := NumberField(f2);
+
+for trial in [1..N] do
+        f3 := x^3 + Random(-19,19)*x^2 + Random(-19,19)*x + Random(-19,19);
+        discFactors := Factorisation(Abs(Numerator(Discriminant(f3))));
+        if exists{pe : pe in discFactors | pe[1] ge 500} then
+            continue;
+        end if;
+
+        K3<r3> := NumberField(f3);
+        f := f2*f3;
+        f4 := Coefficient(f,4);
+        fp := Derivative(f);
+
+        ell := Random(PrimesUpTo(19));
+        delta2 := ell; 
+        delta3 := r3^2 + Random(-19,19)*r3 + Random(-19,19);
+
+        _, a, b := XGCD(f2,f3);  
+        g := R!Eltseq(delta3);
+        delta := L!(delta2*b*f3 + g*a*f2);
+        deltau2 := delta*(w0+w1*theta+w2*theta^2+w3*theta^3+w4*theta^4)^2;
+
+        //We compute the coefficient of delta*u^2 in the base 1,theta, ..., theta^4
+        elem := deltau2*L!b0/fprime; mselem := Monomials(elem); cselem := Coefficients(elem);
+        Q0 := &+[ Trace(cselem[i])*U!mselem[i]: i in [1..#cselem]];
+         
+        elem := deltau2*b1/fprime; mselem := Monomials(elem); cselem := Coefficients(elem);
+        Q1 := &+[ Trace(cselem[i])*U!mselem[i]: i in [1..#cselem]];
+         
+        elem := deltau2*b2/fprime; mselem := Monomials(elem); cselem := Coefficients(elem);
+        Q2 := &+[ Trace(cselem[i])*U!mselem[i]: i in [1..#cselem]];
+         
+        elem := deltau2*b3/fprime; mselem := Monomials(elem); cselem := Coefficients(elem);
+        Q3 := &+[ Trace(cselem[i])*U!mselem[i]: i in [1..#cselem]];
+         
+        elem := deltau2*b4/fprime; mselem := Monomials(elem); cselem := Coefficients(elem);
+        Q4 := &+[ Trace(cselem[i])*U!mselem[i]: i in [1..#cselem]];
+
+        M3 := SymmetricMatrix(Q3);
+        M4 := SymmetricMatrix(Q4);
+        k := BaseRing(M4);
+        I := IdentityMatrix(k,5);
+        
+        T := M3*M4^(-1) - f4*I;
+        C := T^2 + p*I;
+        
+        V2 := Nullspace(C);
+        V3 := RowSpace(C);
+        assert Dimension(V2) eq 2 and Dimension(V3) eq 3;
+        
+        B := Matrix(k,[Eltseq(v) : v in Basis(V2) cat Basis(V3)]);
+        M3 := B*M3*Transpose(B);
+        M4 := B*M4*Transpose(B);
+
+        Q3:=QuadraticForm(M3);
+        Q4:=QuadraticForm(M4);
+
+        X := Scheme(P5,[Q3,Q4]);
+
+        bad := PrimeDivisors(6*Abs(Numerator(Determinant(A4)*Discriminant(f))));
+        Sort(~bad);
+        for q in bad do
+            if not IsLocallySolvable(X,q) then
+                continue trial;
+            end if;
+        end for;
+
+        S<d> := RationalFunctionField(k);
+        M3d := ChangeRing(M3,S);
+        M4d := ChangeRing(M4,S);
+        
+        for i,j in [1..2] do
+            M3d[i,j] := d*M3d[i,j];
+            M4d[i,j] := d*M4d[i,j];
+        end for;
+        
+        Q3d := QuadraticForm(M3d);
+        Q4d := QuadraticForm(M4d);
+        if SearchTwists(Q3d,Q4d,N) then continue; end if;
+
+        F<d> := RationalFunctionField(K2);
+        iota := hom<S -> F | d>;
+        
+        M := ChangeRing(M3d,F,iota) - (F!sqy + f4)*ChangeRing(M4d,F,iota);
+        M2 := Submatrix(M,[1,3,4,5],[1,3,4,5]);
+        Quad := QuadraticForm(M2);
+        ok, pt := QuadricPoint(Quad,N);
+
+        if ok then
+            return true, <Q3,Q4,f,delta2,delta3,Quad,pt,I>;
+        end if;
+end for;
