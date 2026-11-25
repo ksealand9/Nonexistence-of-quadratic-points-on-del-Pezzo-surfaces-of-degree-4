@@ -25,20 +25,24 @@ for trial in [1..N] do
         delta2 := ell; 
         delta3 := r3^2 + Random(-19,19)*r3 + Random(-19,19);
 
+        L<theta>, toL := quo<R | f>;
+        _<w0,w1,w2,w3,w4> := PolynomialRing(L,5);
+        
+        fcs := Coefficients(f);
+        f0 := fcs[1]; f1 := fcs[2]; c2 := fcs[3];
+        c3 := fcs[4]; f4 := fcs[5]; f5 := fcs[6];
+        
+        b4 := f5;
+        b3 := theta*b4 + f4;
+        b2 := theta*b3 + c3;
+        b1 := theta*b2 + c2;
+        b0 := theta*b1 + f1;
+        fprime := toL(fp);
+
         _, a, b := XGCD(f2,f3);  
         g := R!Eltseq(delta3);
         delta := L!(delta2*b*f3 + g*a*f2);
         deltau2 := delta*(w0+w1*theta+w2*theta^2+w3*theta^3+w4*theta^4)^2;
-
-        //We compute the coefficient of delta*u^2 in the base 1,theta, ..., theta^4
-        elem := deltau2*L!b0/fprime; mselem := Monomials(elem); cselem := Coefficients(elem);
-        Q0 := &+[ Trace(cselem[i])*U!mselem[i]: i in [1..#cselem]];
-         
-        elem := deltau2*b1/fprime; mselem := Monomials(elem); cselem := Coefficients(elem);
-        Q1 := &+[ Trace(cselem[i])*U!mselem[i]: i in [1..#cselem]];
-         
-        elem := deltau2*b2/fprime; mselem := Monomials(elem); cselem := Coefficients(elem);
-        Q2 := &+[ Trace(cselem[i])*U!mselem[i]: i in [1..#cselem]];
          
         elem := deltau2*b3/fprime; mselem := Monomials(elem); cselem := Coefficients(elem);
         Q3 := &+[ Trace(cselem[i])*U!mselem[i]: i in [1..#cselem]];
