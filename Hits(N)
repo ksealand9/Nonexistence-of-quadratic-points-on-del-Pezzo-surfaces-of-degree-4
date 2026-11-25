@@ -66,13 +66,18 @@ for trial in [1..N] do
         M3 := B*M3*Transpose(B);
         M4 := B*M4*Transpose(B);
 
-        Q3:=QuadraticForm(M3);
-        Q4:=QuadraticForm(M4);
+        scale := LCM([Denominator(c) : c in Eltseq(M3) cat Eltseq(M4)]);
+        M3 := scale*M3;
+        M4 := scale*M4;
+        
+        Q3 := U!QuadraticForm(M3);
+        Q4 := U!QuadraticForm(M4);
+        X := Scheme(P,[Q3,Q4]);
+        
+        bad := PrimeDivisors(6*Abs(Numerator(Determinant(M4)*Discriminant(f))));
 
-        X := Scheme(P5,[Q3,Q4]);
-
-        bad := PrimeDivisors(6*Abs(Numerator(Determinant(A4)*Discriminant(f))));
         Sort(~bad);
+
         for q in bad do
             if not IsLocallySolvable(X,q) then
                 continue trial;
@@ -101,6 +106,9 @@ for trial in [1..N] do
         ok, pt := QuadricPoint(Quad,N);
 
         if ok then
-            return true, <Q3,Q4,f,delta2,delta3,Quad,pt,I>;
+            return true, <Q3,Q4,f,delta2,delta3,Quad,pt>;
         end if;
-end for;
+    end for;
+
+    return false, <>;
+end function;
